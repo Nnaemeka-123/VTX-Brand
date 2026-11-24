@@ -224,6 +224,9 @@ button.nav{width:100%;border:0;background:none;text-align:left;font:inherit;font
 @media(max-width:900px){.aibtn{bottom:88px;right:14px;width:48px;height:48px}.aip{left:8px;right:8px;bottom:8px;top:64px;width:auto;max-width:none;height:auto}}
 .usd{display:block;font-size:12px;color:var(--mut);font-weight:500}
 .b.right .usd,.right .usd{text-align:right}
+.logo-anim{animation:logoPulse 1.7s ease-in-out infinite;transform-origin:center}
+@keyframes logoPulse{0%,100%{transform:scale(.8);opacity:.85;filter:drop-shadow(0 3px 5px rgba(0,0,0,.12))}50%{transform:scale(1.18);opacity:1;filter:drop-shadow(0 18px 24px rgba(0,0,0,.38))}}
+@media(prefers-reduced-motion:reduce){.logo-anim{animation:none}}
 </style>
 </head>
 <body>
@@ -337,8 +340,8 @@ addEventListener('hashchange',()=>{closeModal();render();scrollTo(0,0)});
 function pendingCount(){if(!isAdmin())return 0;return S.orders.filter(o=>o.status==='verifying'&&!o.payRef).length+S.payments.filter(p=>p.status==='pending').length+(S.wd||0)}
 function shell(content,active){
  const u=me(),cc=S.cart.reduce((a,c)=>a+c.qty,0),pc=pendingCount();
- const items=[['home','Home','home'],['orders','Orders','box'],['wallet','Balance','wallet'],['products','Products','bag'],['customers','Customers','users'],['chart','Analytics','trend'],['marketing','Marketing','mega'],['discounts','Discounts','tag'],['market','Market','store','Sales channels'],['store','Create store','plus'],['connect','Connect store','link','Apps'],['ai','VTX AI','spark'],['menu','Menu','menu']];
- const side=items.map(([k,l,i,sep])=>(sep?`<div class="nav-sep">${sep}</div>`:'')+(k==='ai'?`<button class="nav" data-a="ai">${ic(i)}${l}</button>`:`<a class="nav ${active===k?'on':''}" href="#/${k}">${ic(i)}${l}${k==='orders'&&pc?`<span class="cnt">${pc}</span>`:''}</a>`)).join('')
+ const items=[['home','Home','home'],['orders','Orders','box'],['wallet','Balance','wallet'],['products','Products','bag'],['customers','Customers','users'],['chart','Analytics','trend'],['marketing','Marketing','mega'],['discounts','Discounts','tag'],['market','Market','store','Sales channels'],['store','Create store','plus'],['connect','Connect store','link','Apps'],['pos','VTX POS','cart'],['ai','VTX AI','spark'],['menu','Menu','menu']];
+ const side=items.map(([k,l,i,sep])=>(sep?`<div class="nav-sep">${sep}</div>`:'')+(k==='ai'?`<button class="nav" data-a="ai">${ic(i)}${l}</button>`:`<a class="nav ${active===k?'on':''}" href="${k==='pos'?'/pos/':'#/'+k}">${ic(i)}${l}${k==='orders'&&pc?`<span class="cnt">${pc}</span>`:''}</a>`)).join('')
   +(isAdmin()?`<a class="nav ${active==='admin'?'on':''}" href="#/admin">${ic('shield')}Admin${pc?`<span class="cnt">${pc}</span>`:''}</a>`:'')
   +`<div class="nav-sep">Preferences</div><a class="nav ${active==='settings'?'on':''}" href="#/settings">${ic('set')}Settings</a>`;
  const bot=[['home','Home','home'],['market','Market','bag'],['orders','Orders','box'],['menu','Menu','menu'],['settings','Settings','set']].map(([k,l,i])=>`<a class="${active===k?'on':''}" href="#/${k}">${ic(i)}${l}${k==='orders'&&pc?`<span class="cnt">${pc}</span>`:''}</a>`).join('');
@@ -486,11 +489,11 @@ function paintChart(){
  c.onpointerleave=()=>{$('#tip').style.display='none'};
 }
 function viewMenu(){
- const u=me();const L=[['store','plus','Create store','Set up your brand, pay and publish'],['wallet','wallet','Balance','Earnings and withdrawals'],['products','bag','Products','Your products and their status'],['orders','box','Orders','Track purchases and brand orders'],['customers','users','Customers','People who bought from you'],['discounts','tag','Discounts','Create promo codes'],['marketing','mega','Marketing','Share your store link'],['cart','cart','Cart','Review what you plan to buy'],['chart','trend','Analytics','Live brand chart'],['connect','link','Connect store','Shopify, Printify and more']];
+ const u=me();const L=[['store','plus','Create store','Set up your brand, pay and publish'],['wallet','wallet','Balance','Earnings and withdrawals'],['pos','cart','VTX POS','Sell in person and design products'],['products','bag','Products','Your products and their status'],['orders','box','Orders','Track purchases and brand orders'],['customers','users','Customers','People who bought from you'],['discounts','tag','Discounts','Create promo codes'],['marketing','mega','Marketing','Share your store link'],['cart','cart','Cart','Review what you plan to buy'],['chart','trend','Analytics','Live brand chart'],['connect','link','Connect store','Shopify, Printify and more']];
  if(isAdmin())L.unshift(['admin','shield','Admin','Payments, brands and revenue']);
  return`<div class="page-h"><h1>Menu</h1></div>
  <div class="card"><div class="row">${u?`<span class="avatar" style="width:52px;height:52px;font-size:16px">${u.role==='admin'?`<img src="${LOGO}" alt="">`:esc(initials(u.name))}</span><div class="grow"><div class="b" style="font-size:16px">${esc(u.name)}</div><div class="mut">${esc(u.email)}</div>${u.role==='admin'?badge('Admin','ok'):''}</div>`:`<img src="${LOGO}" alt="" style="width:52px;height:52px;border-radius:12px"><div class="grow"><div class="b">Welcome to VTXOnline</div><div class="mut">Sign in to order or sell.</div></div><a class="btn p" href="#/auth" data-a="tosign">Sign in</a>`}</div></div>
- <div class="card flush">${L.map(([h,i,t,s])=>`<a class="item" href="#/${h}">${ic(i)}<div class="grow"><div class="b">${t}</div><div class="mut sm">${s}</div></div></a>`).join('')}<a class="item" href="#/settings">${ic('set')}<div class="grow"><div class="b">Settings</div><div class="mut sm">Profile and password</div></div></a></div>
+ <div class="card flush">${L.map(([h,i,t,s])=>`<a class="item" href="${h==='pos'?'/pos/':'#/'+h}">${ic(i)}<div class="grow"><div class="b">${t}</div><div class="mut sm">${s}</div></div></a>`).join('')}<a class="item" href="#/settings">${ic('set')}<div class="grow"><div class="b">Settings</div><div class="mut sm">Profile and password</div></div></a></div>
  ${u?`<button class="btn lg full" data-a="logout">${ic('out')}Sign out</button>`:''}`;
 }
 function viewSettings(){
@@ -682,9 +685,7 @@ function aiContext(){const b=myBrand();return{page:route().name,signedIn:!!me(),
 async function askAI(text){
  if(AIbusy)return;AIM.push({r:'u',t:text});AIbusy=true;drawAI();
  try{let msgs=AIM.slice(-10).map(m=>({role:m.r==='u'?'user':'assistant',content:m.t}));while(msgs.length&&msgs[0].role!=='user')msgs.shift();
-  const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),20000);
-  const res=await fetch('/.netlify/functions/vtx-ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({messages:msgs,context:aiContext()}),signal:ctl.signal});clearTimeout(to);
-  if(!res.ok)throw 0;const j=await res.json();if(!j.reply)throw 0;AIM.push({r:'a',t:j.reply});AIon=true}
+  const j=await api('ai',{messages:msgs,context:aiContext()});if(!j.reply)throw 0;AIM.push({r:'a',t:j.reply});AIon=true}
  catch(e){AIM.push({r:'a',t:localAI(text)});AIon=false}
  AIM=AIM.slice(-30);store.set('ai',AIM);AIbusy=false;drawAI()}
 function aiFmt(t){const btns=[];let x=esc(t).replace(/\[\[go:([^|\]]+)\|([^\]]+)\]\]/g,(m,h,l)=>{if(/^#\/[a-z0-9\/_-]*$/i.test(h))btns.push([h,l]);return''});
@@ -764,7 +765,7 @@ async function api(a,body={}){
  let r;try{r=await fetch('/api',{method:'POST',headers:{'content-type':'application/json',...(TOKEN?{authorization:'Bearer '+TOKEN}:{})},body:JSON.stringify({a,...body})})}catch(e){throw new Error('No internet connection. Try again.')}
  let j={};try{j=await r.json()}catch(e){}
  if(r.status===401&&TOKEN&&a!=='login'){setToken('');S.session=null}
- if(!r.ok)throw new Error(j.error||(r.status===404?'The server part is not set up on this site yet.':'Server error ('+r.status+')'));
+ if(!r.ok)throw new Error(j.error||(r.status===404?'The server part (netlify/functions/api.mjs) is not deployed on this site. GitHub Pages cannot run it, so deploy the repository with Netlify.':'Server error ('+r.status+')'));
  return j}
 async function safe(fn){try{return await fn()}catch(e){toast(e.message||'Something went wrong',1)}}
 async function sync(force){
@@ -779,6 +780,7 @@ function applyState(j,force){
  S.brands.forEach(b=>{if(b.id==='b_vtx'&&!b.logo)b.logo=LOGO});
  LOADED=true;
  if(S.session&&!me()){S.session=null}
+ if(UI.splash)return;
  const pc=pendingCount();document.title=(pc?`(${pc}) `:'')+'VTXOnline Shopping';
  notifyNew(prev,first);
  const r=route().name,ae=document.activeElement,typing=ae&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName);
@@ -800,8 +802,8 @@ function notifyNew(prev,first){
  if(paid.length)toast(`New paid order ${paid[0].id} · ${money(paid[0].subtotal)}${paid.length>1?` (+${paid.length-1} more)`:''}`);
 }
 function renderBoot(){
- $('#app').innerHTML=SYNCERR?`<div class="authw"><div class="authc"><div class="lg0"><img src="${LOGO}" alt=""></div><div class="card"><h2>Can't reach the server</h2><p class="mut" style="margin:6px 0 12px">${esc(SYNCERR)}</p><button class="btn p full" data-a="retry">Try again</button></div></div></div>`
- :`<div class="authw"><div class="authc" style="text-align:center"><div class="lg0"><img src="${LOGO}" alt=""></div><p class="mut"><i class="spin"></i> Loading VTXOnline…</p></div></div>`}
+ $('#app').innerHTML=SYNCERR?`<div class="authw"><div class="authc"><div class="lg0"><img src="${LOGO}" alt=""></div><div class="card"><h2>Can't reach the server</h2><p class="mut" style="margin:6px 0 12px">${esc(SYNCERR)}</p><button class="btn p full" data-a="retry">Try again</button><p class="hint" style="margin-top:12px">To test the server, open <a href="/api" target="_blank" rel="noopener">${esc(location.host)}/api</a> in your browser. It should show <b>"ok":true</b>.</p></div></div></div>`
+ :`<div class="authw"><div class="authc" style="text-align:center"><div class="lg0"><img class="logo-anim" src="${LOGO}" alt="VTX"></div><p class="mut"><i class="spin"></i> Loading VTXOnline…</p></div></div>`}
 function pollLoop(){const mb=myBrand();const busy=(mb&&['publishing','pending'].includes(mb.status))||(mb&&S.products.some(p=>p.brandId===mb.id&&p.status==='publishing'));
  setTimeout(async()=>{if(!document.hidden)await sync(false);pollLoop()},busy?2000:6000)}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync(false)});
@@ -923,7 +925,7 @@ document.addEventListener('submit',async e=>{const f=e.target.closest('form[data
 /* ---------- start ---------- */
 (async()=>{load();if(!location.hash)location.hash='#/home';renderBoot();
  addEventListener('resize',()=>{if(route().name==='chart')paintChart()});
- await sync(true);drawAI();pollLoop();
+ UI.splash=true;await Promise.all([sync(true),new Promise(r=>setTimeout(r,1500))]);UI.splash=false;if(LOADED)render();drawAI();pollLoop();
  loadRate().then(()=>{if(LOADED&&!['checkout','auth'].includes(route().name)&&!$('#modal').innerHTML)render()})})();
 </script>
 </body>
